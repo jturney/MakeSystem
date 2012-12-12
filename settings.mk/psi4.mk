@@ -1,5 +1,5 @@
 need_boost := true
-#need_python := true
+need_python := true
 
 ifndef psi4.psi4_config
 	psi4.psi4_config := psi4-config

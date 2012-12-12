@@ -1,1 +1,1 @@
-system.os := `uname -s`
+system.os := $(shell uname -s)
