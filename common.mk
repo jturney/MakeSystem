@@ -27,6 +27,11 @@ ifeq "$(need_gmp)" "true"
 	LIBRARIES += $(gmp.libraries)
 endif
 
+ifeq "$(need_llvm)" "true"
+	include_dirs += $(llvm.include_dirs)
+	LIBRARIES += $(llvm.libraries)
+endif
+
 CPPFLAGS += $(addprefix -I ,$(sort $(include_dirs)))
 vpath %.h $(include_dirs)
 
