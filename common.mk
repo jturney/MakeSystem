@@ -1,36 +1,48 @@
+include settings.mk/system.mk
 include settings.mk/$(CXX).mk
-include settings.mk/boost.mk
-include settings.mk/gmp.mk
+
+# List new need components here
+needs := psi4 boost gmp llvm
 
 CXXFLAGS += $($(CXX).cxxflags)
 LDFLAGS  += $($(CXX).ldflags)
 TARGET_ARCH += $($(CXX).target_arch)
 
+# Debug and BLAS depend on the compiler. Handle these needs separately
 ifeq "$(need_debug)" "true"
 	CXXFLAGS += $($(CXX).debug)
 else
 	CXXFLAGS += $($(CXX).optimization)
 endif
 
+# BLAS is compiler specific (because of Intel)
 ifeq "$(need_blas)" "true"
 	CXXFLAGS += $($(CXX).blas_cxxflags)
 	LIBRARIES += $($(CXX).blas_libraries)
 endif
 
-ifeq "$(need_boost)" "true"
-	include_dirs += $(boost.include_dirs)
-	LIBRARIES += $(boost.libraries)
+define handle-need
+ifeq "$$(need_$1)" "true"
+	include_dirs += $$($1.include_dirs)
+	CXXFLAGS += $$($1.cxxflags)
+	LIBRARIES += $$($1.libraries)
+	LDFLAGS += $$($1.ldflags)
+	ifdef $1.program_suffix
+	PROGRAM_SUFFIX += $$($1.program_suffix)
+	endif
 endif
+endef
 
-ifeq "$(need_gmp)" "true"
-	include_dirs += $(gmp.include_dirs)
-	LIBRARIES += $(gmp.libraries)
-endif
+define include-need
+include settings.mk/$1.mk
+endef
 
-ifeq "$(need_llvm)" "true"
-	include_dirs += $(llvm.include_dirs)
-	LIBRARIES += $(llvm.libraries)
-endif
+$(foreach need,$(needs),$(eval $(call include-need,$(need))))
+$(foreach need,$(needs),$(eval $(call handle-need,$(need))))
+#$(shell echo $(PROGRAM_SUFFIX) ;)
+exe_with_suffix := $(addsuffix $(PROGRAM_SUFFIX),$(exe))
+
+all: $(exe_with_suffix)
 
 CPPFLAGS += $(addprefix -I ,$(sort $(include_dirs)))
 vpath %.h $(include_dirs)
@@ -43,15 +55,12 @@ objects += $$($1_objects)
 dependencies += $$($1_dependencies)
 assembly += $$($1_assembly)
 
-$1: $$($1_objects)
+$(1)$(PROGRAM_SUFFIX): $$($1_objects)
 	$(CXX) $(LDFLAGS) -o $$@ $$^ $(LIBRARIES)
 endef
 
 #$(eval $(call build-program,etemplate,$(etemplate_sources)))
 $(foreach prog,$(exe),$(eval $(call build-program,$(prog),$($(prog)_sources))))
-
-# Default make target
-all: $(exe)
 
 # Rule to create assembly code only
 asm: $(assembly)
@@ -71,4 +80,12 @@ endif
 
 %.s: %.cc
 	$(CXX) -S $< $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -o $@
+
+help:
+	@echo "List of available targets:"
+	@echo "     all"
+	@echo "     clean"
+	@echo "     asm"
+	@$(foreach prog,$(exe_with_suffix),echo "     $(prog)";)
+
 
