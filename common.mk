@@ -1,6 +1,9 @@
 include settings.mk/system.mk
 
+# List known compilers
 compilers := g++ icpc clang++
+# List new need components here
+needs := psi4 boost python gmp llvm
 
 define handle-compiler
 ifneq (,$(findstring $1,$(CXX)))
@@ -10,11 +13,7 @@ endif
 endef
 $(foreach comp,$(compilers),$(eval $(call handle-compiler,$(comp))))
 
-#include settings.mk/$(CXX).mk
-
-# List new need components here
-needs := psi4 boost python gmp llvm
-
+# Compiler specific flags
 CXXFLAGS += $(c++.cxxflags)
 LDFLAGS  += $(c++.ldflags)
 TARGET_ARCH += $(c++.target_arch)
@@ -52,8 +51,9 @@ $(foreach need,$(needs),$(eval $(call include-need,$(need))))
 $(foreach need,$(needs),$(eval $(call handle-need,$(need))))
 #$(shell echo $(PROGRAM_SUFFIX) ;)
 exe_with_suffix := $(addsuffix $(PROGRAM_SUFFIX),$(exe))
+lib_with_liba := $(foreach libr,$(lib),lib$(libr).a)
 
-all: $(exe_with_suffix)
+all: $(lib_with_liba) $(exe_with_suffix)
 
 CPPFLAGS += $(addprefix -I ,$(sort $(include_dirs)))
 vpath %.h $(include_dirs)
@@ -70,15 +70,28 @@ $(1)$(PROGRAM_SUFFIX): $$($1_objects)
 	$(CXX) $(LDFLAGS) -o $$@ $$^ $(LIBRARIES)
 endef
 
+define build-library
+$1_objects := $(subst .cc,.o,$2)
+$1_dependencies := $(subst .cc,.d,$2)
+$1_assembly := $(subst .cc,.s,$2)
+objects += $$($1_objects)
+dependencies += $$($1_dependencies)
+assembly += $$($1_assembly)
+
+lib$(1).a: $$($1_objects)
+	$(AR) r $$@ $$^
+endef
+
 #$(eval $(call build-program,etemplate,$(etemplate_sources)))
 $(foreach prog,$(exe),$(eval $(call build-program,$(prog),$($(prog)_sources))))
+$(foreach libr,$(lib),$(eval $(call build-library,$(libr),$($(libr)_sources))))
 
 # Rule to create assembly code only
 asm: $(assembly)
 
 .PHONY: clean
 clean:
-	$(RM) $(exe) $(objects) $(dependencies) $(assembly)
+	$(RM) $(lib_with_liba) $(exe_with_suffix) $(lib) $(objects) $(dependencies) $(assembly)
 
 ifneq "$(MAKECMDGOALS)" "clean"
 ifneq "$(MAKECMDGOALS)" "asm"
@@ -98,5 +111,6 @@ help:
 	@echo "     clean"
 	@echo "     asm"
 	@$(foreach prog,$(exe_with_suffix),echo "     $(prog)";)
+	@$(foreach libr,$(lib_with_liba),echo "     $(libr)";)
 
 

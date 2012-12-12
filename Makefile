@@ -1,10 +1,10 @@
 # List of binaries to generate
 exe := hello
-#exe := etemplate dimension
+lib := test
 
 # Sources specific to each binary
 hello_sources := src/main.cc
-#dimension_sources := src/dimension.cc
+test_sources := src/test.cc
 
 # Common include directories
 include_dirs := include
