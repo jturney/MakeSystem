@@ -1,8 +1,8 @@
 # Compilation flags specific for icpc
-icpc.optimization := -O3
-icpc.debug := -O0 -g
-icpc.cxxflags := -std=c++11
-icpc.ldflags := 
-icpc.target_arch := 
-icpc.blas_cxxflags := -mkl
-icpc.blas_libraries := -mkl
+c++.optimization := -O3
+c++.debug := -O0 -g
+c++.cxxflags := -std=c++11
+c++.ldflags := 
+c++.target_arch := 
+c++.blas_cxxflags := -mkl
+c++.blas_libraries := -mkl

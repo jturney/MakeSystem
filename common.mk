@@ -1,24 +1,35 @@
 include settings.mk/system.mk
-include settings.mk/$(CXX).mk
+
+compilers := g++ icpc clang++
+
+define handle-compiler
+ifneq (,$(findstring $1,$(CXX)))
+	compiler := $1
+	include settings.mk/$1.mk
+endif
+endef
+$(foreach comp,$(compilers),$(eval $(call handle-compiler,$(comp))))
+
+#include settings.mk/$(CXX).mk
 
 # List new need components here
-needs := psi4 boost gmp llvm
+needs := psi4 boost python gmp llvm
 
-CXXFLAGS += $($(CXX).cxxflags)
-LDFLAGS  += $($(CXX).ldflags)
-TARGET_ARCH += $($(CXX).target_arch)
+CXXFLAGS += $(c++.cxxflags)
+LDFLAGS  += $(c++.ldflags)
+TARGET_ARCH += $(c++.target_arch)
 
 # Debug and BLAS depend on the compiler. Handle these needs separately
 ifeq "$(need_debug)" "true"
-	CXXFLAGS += $($(CXX).debug)
+	CXXFLAGS += $(c++.debug)
 else
-	CXXFLAGS += $($(CXX).optimization)
+	CXXFLAGS += $(c++.optimization)
 endif
 
 # BLAS is compiler specific (because of Intel)
 ifeq "$(need_blas)" "true"
-	CXXFLAGS += $($(CXX).blas_cxxflags)
-	LIBRARIES += $($(CXX).blas_libraries)
+	CXXFLAGS += $(c++.blas_cxxflags)
+	LIBRARIES += $(c++.blas_libraries)
 endif
 
 define handle-need
