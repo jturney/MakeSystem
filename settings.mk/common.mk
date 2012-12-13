@@ -1,7 +1,7 @@
 include settings.mk/system.mk
 
 # List known compilers
-compilers := g++ icpc clang++
+compilers := c++ g++ icpc clang++
 # List new need components here
 needs := psi4 boost python gmp llvm
 
