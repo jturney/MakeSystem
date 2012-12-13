@@ -1,10 +1,10 @@
 # List of binaries to generate
-exe := hello
-lib := test
+exe := ${name}
+#lib := test
 
 # Sources specific to each binary
-hello_sources := src/main.cc
-test_sources := src/test.cc
+${name}_sources := ${sources}
+#test_sources := src/test.cc
 
 # Common include directories
 include_dirs := include
