@@ -40,7 +40,7 @@ makefile_template = Template(filename=mkdir+'/Makefile')
 
 makefile = None
 try:
-    makefile = open('Makefile.test', 'w')
+    makefile = open('Makefile', 'w')
     makefile.write(makefile_template.render(name=binaryname, sources=' '.join(source)))
 except IOError as e:
     print "Unable to create your makefile file."
