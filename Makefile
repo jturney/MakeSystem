@@ -24,5 +24,5 @@ need_psi4 := true
 #need_gmp := true
 need_boost := true
 
-include common.mk
+include settings.mk/common.mk
 
