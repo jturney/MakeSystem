@@ -35,7 +35,8 @@ define handle-need
 ifeq "$$(need_$1)" "true"
 	include_dirs += $$($1.include_dirs)
 	CXXFLAGS += $$($1.cxxflags)
-	LIBRARIES += $$($1.libraries)
+	libraries += $$($1.libraries)
+	library_dirs += $$($1.library_dirs)
 	LDFLAGS += $$($1.ldflags)
 	ifdef $1.program_suffix
 	PROGRAM_SUFFIX += $$($1.program_suffix)
@@ -56,6 +57,9 @@ lib_with_liba := $(foreach libr,$(lib),lib$(libr).a)
 all: $(lib_with_liba) $(exe_with_suffix)
 
 CPPFLAGS += $(addprefix -I ,$(sort $(include_dirs)))
+LIBRARIES += $(addprefix -L ,$(sort $(library_dirs)))
+LIBRARIES += $(addprefix -l ,$(sort $(libraries)))
+
 vpath %.h $(include_dirs)
 
 define build-program

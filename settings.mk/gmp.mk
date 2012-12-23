@@ -1,2 +1,3 @@
 gmp.include_dirs := /usr/local/include
-gmp.libraries := -L/usr/local/lib -lgmp
+gmp.libraries := gmp
+gmp.library_dirs := /usr/local/lib
