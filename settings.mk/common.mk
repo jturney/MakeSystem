@@ -3,7 +3,7 @@ include settings.mk/system.mk
 # List known compilers
 compilers := c++ g++ icpc clang++
 # List new need components here
-needs := psi4 boost python gmp llvm libssh2
+needs := psi4 boost python gmp llvm libssh2 tbb
 
 define handle-compiler
 ifneq (,$(findstring $1,$(CXX)))
