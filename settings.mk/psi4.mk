@@ -17,5 +17,8 @@ else
 	psi4.ldflags := -shared
 endif
 
+psi4.library_dirs := ${psi4.objdir}/lib
+psi4.libraries := PSI_plugin
+
 psi4.program_suffix := .so
 
