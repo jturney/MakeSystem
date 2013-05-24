@@ -3,7 +3,7 @@ include settings.mk/system.mk
 # List known compilers
 compilers := c++ g++ icpc clang++
 # List new need components here
-needs := psi4 boost python gmp llvm libssh2 tbb
+needs := psi4 boost python gmp llvm libssh2 tbb libtensor
 
 define handle-compiler
 ifneq (,$(findstring $1,$(CXX)))
@@ -38,6 +38,7 @@ ifeq "$$(need_$1)" "true"
 	libraries += $$($1.libraries)
 	library_dirs += $$($1.library_dirs)
 	LDFLAGS += $$($1.ldflags)
+	definitions += $$($1.definitions)
 	ifdef $1.program_suffix
 	PROGRAM_SUFFIX += $$($1.program_suffix)
 	endif
@@ -59,6 +60,7 @@ all: $(lib_with_liba) $(exe_with_suffix)
 CPPFLAGS += $(addprefix -I ,$(sort $(include_dirs)))
 LIBRARIES += $(addprefix -L ,$(sort $(library_dirs)))
 LIBRARIES += $(addprefix -l ,$(sort $(libraries)))
+DEFINES += $(addprefix -D ,$(sort $(definitions)))
 
 vpath %.h $(include_dirs)
 
@@ -104,10 +106,10 @@ endif
 endif
 
 %.o: %.cc
-	$(CXX) -c $< $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -o $@ -MT $@ -MMD -MP -MF $*.d
+	$(CXX) $(DEFINES) -c $< $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -o $@ -MT $@ -MMD -MP -MF $*.d
 
 %.s: %.cc
-	$(CXX) -S $< $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -o $@
+	$(CXX) $(DEFINES) -S $< $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -o $@
 
 help:
 	@echo "List of available targets:"
