@@ -3,7 +3,7 @@ include settings.mk/system.mk
 # List known compilers
 compilers := c++ g++ icpc clang++
 # List new need components here
-needs := psi4 boost python gmp llvm libssh2 tbb libtensor
+needs := psi4 boost python gmp llvm libssh2 tbb libtensor scalapack ga openblas
 
 define handle-compiler
 ifneq (,$(findstring $1,$(CXX)))
@@ -73,7 +73,8 @@ dependencies += $$($1_dependencies)
 assembly += $$($1_assembly)
 
 $(1)$(PROGRAM_SUFFIX): $$($1_objects)
-	$(CXX) $(LDFLAGS) -o $$@ $$^ $(LIBRARIES)
+	@echo "     LINK: $$@"
+	@$(CXX) $(LDFLAGS) -o $$@ $$^ $(LIBRARIES)
 endef
 
 define build-library
@@ -97,7 +98,7 @@ asm: $(assembly)
 
 .PHONY: clean
 clean:
-	$(RM) $(lib_with_liba) $(exe_with_suffix) $(lib) $(objects) $(dependencies) $(assembly)
+	$(RM) $(lib_with_liba) $(exe_with_suffix) $(objects) $(dependencies) $(assembly)
 
 ifneq "$(MAKECMDGOALS)" "clean"
 ifneq "$(MAKECMDGOALS)" "asm"
@@ -106,7 +107,8 @@ endif
 endif
 
 %.o: %.cc
-	$(CXX) $(DEFINES) -c $< $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -o $@ -MT $@ -MMD -MP -MF $*.d
+	@echo "  COMPILE: $<"
+	@$(CXX) $(DEFINES) -c $< $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -o $@ -MT $@ -MMD -MP -MF $*.d
 
 %.s: %.cc
 	$(CXX) $(DEFINES) -S $< $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -o $@
